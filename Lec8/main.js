@@ -24,7 +24,7 @@ function debouncer(callback, ms) {
     let timeout
     return (...args) => {
         clearTimeout(timeout)
-        timeout = setTimeout(() => {
+        timer = setTimeout(() => {
             callback(...args)
         }, ms)
     }
@@ -90,7 +90,7 @@ const carInput = document.getElementById('car-id')
                 carInfo.innerText = ''
                 return
             }
-            
+
 
             const data = await resp.json()
             const car = data.Car
