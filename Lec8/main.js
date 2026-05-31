@@ -21,9 +21,9 @@
 
 //1 
 function debouncer(callback, ms) {
-    let timeout
+    let timer
     return (...args) => {
-        clearTimeout(timeout)
+        clearTimeout(timer)
         timer = setTimeout(() => {
             callback(...args)
         }, ms)
