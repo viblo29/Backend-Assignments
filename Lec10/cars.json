@@ -1,0 +1,32 @@
+[
+  {
+    "carName": "Ferrari",
+    "carColor": "red",
+    "carReleaseDate": "2020"
+  },
+  {
+    "carName": "Ferrari",
+    "carColor": "red",
+    "carReleaseDate": "2020"
+  },
+  {
+    "carName": "Mercedes",
+    "carColor": "black",
+    "carReleaseDate": "2024"
+  },
+  {
+    "carName": "BMW",
+    "carColor": "blue",
+    "carReleaseDate": "2020"
+  },
+  {
+    "carName": "Audi",
+    "carColor": "red",
+    "carReleaseDate": "2021"
+  },
+  {
+    "carName": "Audi",
+    "carReleaseDate": "2026",
+    "carColor": "black"
+  }
+]
