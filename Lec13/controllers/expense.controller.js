@@ -61,7 +61,6 @@ exports.deleteExpenseById = async (req, res) => {
 }
 
 exports.getRandomFact = (req, res) => {
-    console.log("Fact-ის კონტროლერში შემოვიდა!")
     const fact = ExpenseService.getRandomFact()
     res.json(fact)
 }
