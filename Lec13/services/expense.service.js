@@ -1,90 +1,68 @@
-const { readFile, writeFile } = require("../utils/fs.util")
+const Expense = require("../models/expense.model")
 
 exports.getAllExpenses = async (query) => {
-    let expenses = await readFile("expenses.json", true)
+    const { category, amountFrom, amountTo, page = 1, take = 10 } = query
+    const filter = {}
 
-    const page = Math.max(Number(query.page) || 1, 1)
-    let take = Math.max(Number(query.take) || 10, 1)
-
-    if (take > 50) {
-        take = 50
+    if (category) {
+        const categoriesArray = category.split(",").map(cat => cat.trim().toLowerCase())
+        filter.category = { $in: categoriesArray }
     }
 
-    const startIndex = (page - 1) * take
-    const endIndex = page * take
-    return expenses.slice(startIndex, endIndex)
+    if (amountFrom || amountTo) {
+        filter.amount = {}
+        if (amountFrom) filter.amount.$gte = Number(amountFrom)
+        if (amountTo) filter.amount.$lte = Number(amountTo)
+    }
+
+    const pageNumber = Math.max(Number(page), 1)
+    let limitNumber = Math.max(Number(take), 1)
+    if (limitNumber > 50) limitNumber = 50
+
+    const startIndex = (pageNumber - 1) * limitNumber
+
+    return await Expense.find(filter)
+        .skip(startIndex)
+        .limit(limitNumber)
+}
+
+exports.getTopFiveExpenses = async () => {
+    return await Expense.find()
+        .sort({ amount: -1 })
+        .limit(5)
 }
 
 exports.getExpenseById = async (id) => {
-    const expenses = await readFile("expenses.json", true)
-    const index = expenses.findIndex((exp) => exp.id === id)
-    
-    if (index === -1) {
-        return null
-    }
-    return expenses[index]
+    return await Expense.findById(id)
 }
 
 exports.createExpense = async (body) => {
-    const expenses = await readFile("expenses.json", true)
-    const lastId = expenses[expenses.length - 1]?.id || 0
-
-    const newExpense = {
-        id: lastId + 1,
+    const newExpense = new Expense({
         title: body.title,
-        amount: body.amount
-    }
-
-    expenses.push(newExpense)
-    await writeFile("expenses.json", expenses)
-    return newExpense
+        amount: body.amount,
+        category: body.category || "other" 
+    })
+    return await newExpense.save()
 }
 
 exports.updateExpenseById = async (id, body) => {
-    const expenses = await readFile("expenses.json", true)
-    const index = expenses.findIndex((exp) => exp.id === id)
-
-    if (index === -1) {
-        return null
-    }
-
-    const updateReq = {}
-    if (body.title && typeof body.title === "string") {
-        updateReq["title"] = body.title
-    }
-    if (body.amount && typeof body.amount === "number") {
-        updateReq["amount"] = body.amount
-    }
-
-    expenses[index] = {
-        ...expenses[index],
-        ...updateReq
-    }
-
-    await writeFile("expenses.json", expenses)
-    return expenses[index]
+    return await Expense.findByIdAndUpdate(
+        id,
+        { $set: body },
+        { new: true, runValidators: true }
+    )
 }
 
 exports.deleteExpenseById = async (id) => {
-    const expenses = await readFile("expenses.json", true)
-    const index = expenses.findIndex((exp) => exp.id === id)
-
-    if (index === -1) {
-        return null
-    }
-
-    const deletedExpense = expenses.splice(index, 1)
-    await writeFile("expenses.json", expenses)
-    return deletedExpense[0]
+    return await Expense.findByIdAndDelete(id)
 }
 
 exports.getRandomFact = () => {
     const facts = [
-        "The first computer bug was an actual real bug found in a relay",
-        "JavaScript was created in just 10 days by Brendan Eich in 1995",
-        "Node.js was initially written by Ryan Dahl in 2009",
-        "MongoDB's name comes from the word humongous",
-        "Express.js was founded by TJ Holowaychuk in 2010"
+        "MongoDB stores data in flexible, JSON-like documents.",
+        "Mongoose provides a straight-forward, schema-based solution to model application data.",
+        "The name MongoDB comes from the word humongous.",
+        "NoSQL databases scale horizontally rather than vertically."
     ]
     const randomIndex = Math.floor(Math.random() * facts.length)
     return { fact: facts[randomIndex] }

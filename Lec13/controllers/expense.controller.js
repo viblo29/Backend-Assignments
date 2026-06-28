@@ -5,15 +5,22 @@ exports.getAllExpenses = async (req, res) => {
         const expenses = await ExpenseService.getAllExpenses(req.query)
         res.json(expenses)
     } catch (e) {
-        res.status(500).json({ message: "Server error" })
+        res.status(500).json({ message: "Server error", error: e.message })
+    }
+}
+
+exports.getTopFiveExpenses = async (req, res) => {
+    try {
+        const topExpenses = await ExpenseService.getTopFiveExpenses()
+        res.json(topExpenses)
+    } catch (e) {
+        res.status(500).json({ message: "Server error", error: e.message })
     }
 }
 
 exports.getExpenseById = async (req, res) => {
     try {
-        const id = Number(req.params.id)
-        const expense = await ExpenseService.getExpenseById(id)
-        
+        const expense = await ExpenseService.getExpenseById(req.params.id)
         if (!expense) {
             return res.status(404).json({ message: "expense not found" })
         }
@@ -28,15 +35,13 @@ exports.createExpense = async (req, res) => {
         const newExpense = await ExpenseService.createExpense(req.body)
         res.status(201).json({ success: true, data: newExpense })
     } catch (e) {
-        res.status(500).json({ message: "Server error" })
+        res.status(500).json({ message: "Server error", error: e.message })
     }
 }
 
 exports.updateExpenseById = async (req, res) => {
     try {
-        const id = Number(req.params.id)
-        const updatedExpense = await ExpenseService.updateExpenseById(id, req.body)
-
+        const updatedExpense = await ExpenseService.updateExpenseById(req.params.id, req.body)
         if (!updatedExpense) {
             return res.status(404).json({ message: "expense not found" })
         }
@@ -48,9 +53,7 @@ exports.updateExpenseById = async (req, res) => {
 
 exports.deleteExpenseById = async (req, res) => {
     try {
-        const id = Number(req.params.id)
-        const deletedExpense = await ExpenseService.deleteExpenseById(id)
-
+        const deletedExpense = await ExpenseService.deleteExpenseById(req.params.id)
         if (!deletedExpense) {
             return res.status(404).json({ message: "expense not found" })
         }
